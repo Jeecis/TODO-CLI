@@ -1,14 +1,4 @@
 services:
-  app:
-    build: .
-    depends_on:
-      - db
-    environment:
-      - DB_URL=jdbc:postgresql://db:5432/taskmanager
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-    restart: on-failure
-
   db:
     image: postgres:14
     environment:

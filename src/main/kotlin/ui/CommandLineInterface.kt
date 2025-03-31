@@ -8,9 +8,11 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
+// command line interface for managing tasks. it handle user inputs and display outputs
 class CommandLineInterface(private val taskService: TaskService) {
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
+    // start the application and display menu until user choose to exit
     fun start() {
         println("=== Welcome to Task Manager ===")
         var running = true
@@ -37,6 +39,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         }
     }
 
+    // display the main menu with all available commands
     private fun printMenu() {
         println("\nAvailable commands:")
         println("  add     - Add a new task")
@@ -53,6 +56,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         print("\nEnter command: ")
     }
 
+    // show detailed help information about commands and data formats
     private fun printHelp() {
         println("\n=== Task Manager Help ===")
         println("This application allows you to manage your tasks.")
@@ -73,8 +77,10 @@ class CommandLineInterface(private val taskService: TaskService) {
         println("Status options: TODO, IN_PROGRESS, COMPLETED")
     }
 
+    // read user input and convert to lowercase for easier processing
     private fun readCommand(): String = readLine()?.trim()?.lowercase() ?: ""
 
+    // collect task information from user and create new task in system
     private fun addTask() {
         println("\n=== Add New Task ===")
 
@@ -104,6 +110,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         println("Task created with ID: $taskId")
     }
 
+    // show all tasks in system in a table format
     private fun listTasks() {
         println("\n=== All Tasks ===")
         val tasks = taskService.getAllTasks()
@@ -115,6 +122,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         printTaskList(tasks)
     }
 
+    // get and display detailed information about specific task
     private fun viewTask() {
         print("Enter task ID: ")
         val id = readLine()?.trim()?.toIntOrNull()
@@ -132,6 +140,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         printTaskDetails(task)
     }
 
+    // update existing task with new values. it keeps old values when user skip input
     private fun editTask() {
         print("Enter task ID to edit: ")
         val id = readLine()?.trim()?.toIntOrNull()
@@ -208,6 +217,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         }
     }
 
+    // remove task from system after user confirmation
     private fun deleteTask() {
         print("Enter task ID to delete: ")
         val id = readLine()?.trim()?.toIntOrNull()
@@ -229,6 +239,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         }
     }
 
+    // search for task containing specific keyword in title, description or category
     private fun searchTasks() {
         println("\n=== Search Tasks ===")
         print("Enter search keyword: ")
@@ -249,6 +260,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         printTaskList(tasks)
     }
 
+    // display tasks in sorted order based on selected field
     private fun sortTasks() {
         println("\n=== Sort Tasks ===")
         println("Sort by: duedate, priority, status, title")
@@ -265,6 +277,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         printTaskList(tasks)
     }
 
+    // show summary statistics about all task in the system
     private fun showStatistics() {
         println("\n=== Task Statistics ===")
         val stats = taskService.getTaskStatistics()
@@ -278,6 +291,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         println("High priority tasks: ${stats["highPriorityTasks"]}")
     }
 
+    // display tasks that are due in the next 7 days from today
     private fun showUpcomingTasks() {
         println("\n=== Tasks Due in Next Week ===")
         val tasks = taskService.getTasksDueNextWeek()
@@ -290,6 +304,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         printTaskList(tasks)
     }
 
+    // helper function to format and display list of tasks in table format
     private fun printTaskList(tasks: List<Task>) {
         val format = "| %-4s | %-25s | %-10s | %-8s | %-12s | %-10s |"
         println(String.format(format, "ID", "Title", "Due Date", "Priority", "Status", "Category"))
@@ -308,6 +323,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         }
     }
 
+    // display all details of a single task in vertical format
     private fun printTaskDetails(task: Task) {
         println("\n=== Task ${task.id} ===")
         println("Title: ${task.title}")
@@ -318,6 +334,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         println("Category: ${task.category ?: "None"}")
     }
 
+    // parse user input for date and handle error. it returns today date if input empty
     private fun tryParseDueDate(): LocalDate? {
         return try {
             val input = readLine()?.trim()
@@ -333,6 +350,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         }
     }
 
+    // parse user input for priority and use medium as default. it validate against enum values
     private fun tryParsePriority(): Priority? {
         return try {
             val input = readLine()?.trim()?.uppercase() ?: "MEDIUM"
@@ -348,6 +366,7 @@ class CommandLineInterface(private val taskService: TaskService) {
         }
     }
 
+    // parse user input for status and use todo as defaut value. it replace spaces with underscores
     private fun tryParseStatus(): Status? {
         return try {
             val input = readLine()?.trim()?.uppercase()?.replace(" ", "_") ?: "TODO"
@@ -363,3 +382,4 @@ class CommandLineInterface(private val taskService: TaskService) {
         }
     }
 }
+

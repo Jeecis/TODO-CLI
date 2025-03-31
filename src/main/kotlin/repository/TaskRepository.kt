@@ -9,6 +9,7 @@ import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDate
 
+// table definition for storing tasks in database. it containts fields for task properties
 object Tasks : Table() {
     val id = integer("id").autoIncrement()
     val title = varchar("title", 100)
@@ -21,6 +22,7 @@ object Tasks : Table() {
     override val primaryKey = PrimaryKey(id)
 }
 
+// repository class to handle all database operation for tasks. it manages the connection and crud operations
 class TaskRepository(private val database: Database) {
     init {
         transaction(database) {
@@ -28,6 +30,7 @@ class TaskRepository(private val database: Database) {
         }
     }
 
+    // create a new task in database and return the generated id. it insert all task properties
     fun createTask(task: Task): Int = transaction(database) {
         Tasks.insert {
             it[title] = task.title
@@ -39,16 +42,19 @@ class TaskRepository(private val database: Database) {
         }[Tasks.id]
     }
 
+    // get all task from database and convert them to task objects
     fun getAllTasks(): List<Task> = transaction(database) {
         Tasks.selectAll().map { it.toTask() }
     }
 
+    // find a task by its id and return null if no task found with that id
     fun getTaskById(id: Int): Task? = transaction(database) {
         Tasks.select { Tasks.id eq id }
             .map { it.toTask() }
             .singleOrNull()
     }
 
+    // update existing task details and return true if update was sucessful
     fun updateTask(task: Task): Boolean = transaction(database) {
         if (task.id == null) return@transaction false
 
@@ -62,11 +68,12 @@ class TaskRepository(private val database: Database) {
         } > 0
     }
 
+    // delete a task by its id and return true if deletion was done
     fun deleteTask(id: Int): Boolean = transaction(database) {
         Tasks.deleteWhere { Tasks.id eq id } > 0
     }
 
-    // Additional feature 1: Search by keyword
+    // search for tasks containing keyword in title, description or category field
     fun searchTasks(keyword: String): List<Task> = transaction(database) {
         Tasks.select {
             (Tasks.title like "%$keyword%") or
@@ -75,12 +82,12 @@ class TaskRepository(private val database: Database) {
         }.map { it.toTask() }
     }
 
-    // Additional feature 1: Search by category
+    // filter tasks by specific category value
     fun getTasksByCategory(category: String): List<Task> = transaction(database) {
         Tasks.select { Tasks.category eq category }.map { it.toTask() }
     }
 
-    // Additional feature 1: Sort by different fields
+    // get tasks sorted by different fields depending on user preference
     fun getTasksSortedBy(sortField: String): List<Task> = transaction(database) {
         val query = when (sortField.lowercase()) {
             "duedate" -> Tasks.selectAll().orderBy(Tasks.dueDate)
@@ -92,7 +99,7 @@ class TaskRepository(private val database: Database) {
         query.map { it.toTask() }
     }
 
-    // Additional feature 2: Tasks due in next week
+    // get tasks that are due within next 7 days from today
     fun getTasksDueNextWeek(): List<Task> = transaction(database) {
         val today = LocalDate.now()
         val nextWeek = today.plusDays(7)
@@ -102,7 +109,7 @@ class TaskRepository(private val database: Database) {
         }.map { it.toTask() }
     }
 
-    // Helper function to convert row to Task object
+    // helper method that maps database row to task object. This makes code more cleaner
     private fun ResultRow.toTask(): Task {
         return Task(
             id = this[Tasks.id],
